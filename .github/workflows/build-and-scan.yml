@@ -68,7 +68,7 @@ jobs:
           format: 'table'
 
       - name: Grype scan pushed image
-        uses: anchore/grype-action@main
+        uses: anchore/grype-action@v0
         with:
           image: ghcr.io/${{ github.repository_owner }}/nginx-ci-demo:${{ github.sha }}
 
