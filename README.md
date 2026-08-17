@@ -1,5 +1,10 @@
 # nginx-ci-demo
 
+[![Build and Scan](https://github.com/flesrusselle/nginx-ci-demo/actions/workflows/build-and-scan.yml/badge.svg)](https://github.com/flesrusselle/nginx-ci-demo/actions/workflows/build-and-scan.yml)
+[![Deploy (kind)](https://github.com/flesrusselle/nginx-ci-demo/actions/workflows/deploy-kind.yml/badge.svg)](https://github.com/flesrusselle/nginx-ci-demo/actions/workflows/deploy-kind.yml)
+[![Validation (PR)](https://github.com/flesrusselle/nginx-ci-demo/actions/workflows/validation.yml/badge.svg)](https://github.com/flesrusselle/nginx-ci-demo/actions/workflows/validation.yml)
+[![Publish Chart (Pages)](https://github.com/flesrusselle/nginx-ci-demo/actions/workflows/publish-chart.yml/badge.svg)](https://github.com/flesrusselle/nginx-ci-demo/actions/workflows/publish-chart.yml)
+
 A working CI/CD demo for a minimal nginx static site using GitHub Actions.
 
 Features
@@ -81,5 +86,11 @@ Notes
 Troubleshooting
 - Build or push fails: check Actions logs; if GHCR push fails you may need a PAT with write:packages and set it as secret.GPR_PAT
 - Kind cluster pod pending: check resource constraints on the runner; restart or reduce resource requests.
+
+Badge details
+- Build and Scan: runs build, scan, SBOM generation, and pushes images to GHCR
+- Deploy (kind): triggered after a successful build on main to deploy into ephemeral kind
+- Validation (PR): runs on pull requests and non-main pushes (hadolint, helm lint)
+- Publish Chart (Pages): packages chart and deploys to GitHub Pages
 
 License: MIT
