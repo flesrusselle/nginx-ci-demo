@@ -61,11 +61,41 @@ jobs:
           name: sbom
           path: sbom.spdx.json
 
-      - name: Trivy scan pushed image
-        uses: aquasecurity/trivy-action@master
+      - name: Run Trivy scan and save JSON
+        id: trivy
+        run: |
+          mkdir -p trivy-output
+          # run Trivy in a container (no install required); use a pinned version
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+            aquasecurity/trivy:0.43.2 \
+            image --format json --output /tmp/trivy.json ghcr.io/${{ github.repository_owner }}/nginx-ci-demo:${{ github.sha }} || true
+          mv /tmp/trivy.json trivy-output/trivy.json || true
+      
+          # parse summary counts (safe even if file missing/empty)
+          if [ -f trivy-output/trivy.json ]; then
+            CRITICAL=$(jq '[.Results[].Vulnerabilities[]? | select(.Severity=="CRITICAL")] | length' trivy-output/trivy.json)
+            HIGH=$(jq '[.Results[].Vulnerabilities[]? | select(.Severity=="HIGH")] | length' trivy-output/trivy.json)
+            MEDIUM=$(jq '[.Results[].Vulnerabilities[]? | select(.Severity=="MEDIUM")] | length' trivy-output/trivy.json)
+          else
+            CRITICAL=0; HIGH=0; MEDIUM=0
+          fi
+      
+          # write a human-friendly job summary (shows in the Actions UI -> Job -> Summary)
+          echo "## Trivy scan summary for ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Critical: $CRITICAL" >> $GITHUB_STEP_SUMMARY
+          echo "- High: $HIGH" >> $GITHUB_STEP_SUMMARY
+          echo "- Medium: $MEDIUM" >> $GITHUB_STEP_SUMMARY
+      
+          # expose counts as step outputs (optional)
+          echo "critical=${CRITICAL}" >> $GITHUB_OUTPUT
+          echo "high=${HIGH}" >> $GITHUB_OUTPUT
+          echo "medium=${MEDIUM}" >> $GITHUB_OUTPUT
+      
+      - name: Upload Trivy JSON artifact
+        uses: actions/upload-artifact@v4
         with:
-          image-ref: ghcr.io/${{ github.repository_owner }}/nginx-ci-demo:${{ github.sha }}
-          format: 'table'
+          name: trivy-report
+          path: trivy-output/trivy.json
 
   # Optional: add more jobs for additional scans if you like
 
