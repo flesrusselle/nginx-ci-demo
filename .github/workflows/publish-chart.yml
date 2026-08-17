@@ -1,0 +1,40 @@
+name: Publish Helm chart to GitHub Pages
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  pages: write
+  id-token: write
+  contents: read
+
+jobs:
+  package-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v1
+        with:
+          version: v3.12.0
+
+      - name: Package Helm chart
+        run: |
+          mkdir -p site
+          helm package ./chart/nginx-demo -d site
+          helm repo index site --url https://flesrusselle.github.io/nginx-ci-demo
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: site
+
+  deploy-pages:
+    needs: package-and-publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v1
