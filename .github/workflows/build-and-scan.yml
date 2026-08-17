@@ -49,10 +49,10 @@ jobs:
             ghcr.io/${{ github.repository_owner }}/nginx-ci-demo:latest
 
       - name: Generate SBOM (Syft)
-        uses: anchore/syft-action@v0.15.0
+        uses: anchore/sbom-action@v0
         with:
           image: ghcr.io/${{ github.repository_owner }}/nginx-ci-demo:${{ github.sha }}
-          output: sbom.spdx.json
+          output-file: sbom.spdx.json
           format: spdx-json
 
       - name: Upload SBOM artifact
