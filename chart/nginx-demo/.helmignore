@@ -1,0 +1,4 @@
+# Files to ignore when packaging the chart
+.DS_Store
+.gitignore
+README.md

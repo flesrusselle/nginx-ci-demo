@@ -1,0 +1,21 @@
+# Default values for nginx-ci-demo.
+# This file is used by the Helm chart and can be overridden at helm install/upgrade time.
+
+replicaCount: 1
+
+image:
+  repository: ghcr.io/{{ .Release.Service }}
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+
+resources: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+strategy: {}

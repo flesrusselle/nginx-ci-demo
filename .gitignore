@@ -1,0 +1,23 @@
+.DS_Store
+node_modules/
+.env
+*.log
+*.tmp
+.vscode/
+.idea/
+dist/
+.terraform/
+__pycache__/
+*.pyc
+
+# Kind / local k8s artifacts
+kind-config.yaml
+.kind/
+
+# Helm
+charts/
+*.tgz
+
+# Docker
+.dockerignore
+Dockerfile

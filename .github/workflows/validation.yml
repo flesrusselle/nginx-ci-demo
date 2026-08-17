@@ -1,0 +1,30 @@
+name: Validation (lint & checks)
+on:
+  push:
+    branches-ignore:
+      - main
+  pull_request:
+    types: [opened, reopened, synchronize]
+    branches:
+      - main
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Lint Dockerfile (hadolint)
+        uses: hadolint/hadolint-action@v2
+        with:
+          dockerfile: Dockerfile
+
+      - name: Install Helm for linting
+        uses: azure/setup-helm@v1
+        with:
+          version: v3.12.0
+
+      - name: Helm lint chart
+        run: |
+          helm lint ./chart/nginx-demo

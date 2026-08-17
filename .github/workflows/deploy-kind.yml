@@ -1,0 +1,60 @@
+name: Deploy to ephemeral kind cluster via Helm
+on:
+  workflow_run:
+    workflows: ["Build, scan, and push image"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker (needed for kind)
+        uses: docker/setup-buildx-action@v2
+
+      - name: Create kind cluster
+        uses: engineerd/setup-kind@v0.6.0
+        with:
+          kind-version: v0.20.0
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: '1.27.0'
+
+      - name: Install Helm
+        uses: azure/setup-helm@v1
+        with:
+          version: v3.12.0
+
+      - name: Wait for cluster ready
+        run: |
+          kubectl version --client
+          kubectl get nodes
+
+      - name: Deploy Helm chart
+        env:
+          IMAGE_REPO: ghcr.io/${{ github.repository_owner }}/nginx-ci-demo
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          helm upgrade --install nginx-demo ./chart/nginx-demo \
+            --namespace demo --create-namespace \
+            --set image.repository=${IMAGE_REPO} \
+            --set image.tag=${IMAGE_TAG} \
+            --wait
+
+      - name: Verify deployment - list pods & services
+        run: |
+          kubectl get pods -n demo -o wide
+          kubectl get svc -n demo
+
+      - name: Smoke test service (port-forward and curl)
+        run: |
+          # Forward service port to localhost and run a quick curl
+          kubectl port-forward -n demo svc/nginx-ci-demo 8080:80 &
+          sleep 2
+          curl -f http://127.0.0.1:8080/ | head -n 5

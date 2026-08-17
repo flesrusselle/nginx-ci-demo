@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "nginx-ci-demo.fullname" . }}
+  labels:
+    app: {{ include "nginx-ci-demo.name" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "nginx-ci-demo.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "nginx-ci-demo.name" . }}
+    spec:
+      containers:
+        - name: {{ include "nginx-ci-demo.name" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 80
