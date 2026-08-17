@@ -5,6 +5,8 @@
 [![Validation (PR)](https://github.com/flesrusselle/nginx-ci-demo/actions/workflows/validation.yml/badge.svg)](https://github.com/flesrusselle/nginx-ci-demo/actions/workflows/validation.yml)
 [![Publish Chart (Pages)](https://github.com/flesrusselle/nginx-ci-demo/actions/workflows/publish-chart.yml/badge.svg)](https://github.com/flesrusselle/nginx-ci-demo/actions/workflows/publish-chart.yml)
 
+[![Helm Repo](https://img.shields.io/website?down_color=lightgrey&down_message=unavailable&label=Helm%20Repo&up_message=available&url=https%3A%2F%2Fflesrusselle.github.io%2Fnginx-ci-demo)](https://flesrusselle.github.io/nginx-ci-demo)
+
 A working CI/CD demo for a minimal nginx static site using GitHub Actions.
 
 Features
@@ -42,6 +44,21 @@ Helm repo (GitHub Pages)
 SBOMs
 - The build workflow generates an SBOM for the pushed image using Syft and uploads it as a workflow artifact named `sbom`.
 - You can download SBOMs from the Actions run artifacts for inspection or compliance.
+
+One-command demo: trigger build and download SBOM (gh CLI)
+We added a small helper script that uses the GitHub CLI (gh) to trigger the build-and-scan workflow and download the `sbom` artifact when the run completes.
+
+Prerequisites
+- GitHub CLI installed and authenticated (gh auth login)
+
+Usage
+- Run the script from the repository root:
+  scripts/trigger_and_fetch_sbom.sh
+
+What it does
+1. Triggers the `build-and-scan` workflow via `gh workflow run`.
+2. Polls for the most recent run of that workflow on the main branch.
+3. When the run completes, downloads the `sbom` artifact into the local artifacts/ directory.
 
 Local development and testing (macOS)
 These commands show how to build & deploy locally to a kind cluster on macOS and access the site.
@@ -92,5 +109,6 @@ Badge details
 - Deploy (kind): triggered after a successful build on main to deploy into ephemeral kind
 - Validation (PR): runs on pull requests and non-main pushes (hadolint, helm lint)
 - Publish Chart (Pages): packages chart and deploys to GitHub Pages
+- Helm Repo: availability check of the published Helm chart index (via shields.io website badge)
 
 License: MIT
